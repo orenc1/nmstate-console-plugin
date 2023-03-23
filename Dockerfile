@@ -10,8 +10,7 @@ WORKDIR /opt/app-root/src/app
 
 # Run install as supper tux
 USER 0
-RUN yarn install --frozen-lockfile --network-timeout 600000
-RUN yarn build
+RUN yarn install --frozen-lockfile --network-timeout 600000 && yarn build
 
 # Web server container
 FROM registry.access.redhat.com/ubi9/nginx-120
