@@ -7,6 +7,8 @@ jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-latest
+    env:
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
