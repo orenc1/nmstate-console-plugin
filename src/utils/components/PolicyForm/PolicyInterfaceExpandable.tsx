@@ -1,7 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { Updater } from 'use-immer';
 
-import { Button, FormFieldGroupExpandable, FormFieldGroupHeader } from '@patternfly/react-core';
+import {
+  Button,
+  FormFieldGroupExpandable,
+  FormFieldGroupHeader,
+  Tooltip,
+} from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons';
 import { NodeNetworkConfigurationInterface, V1NodeNetworkConfigurationPolicy } from '@types';
 import { useNMStateTranslation } from '@utils/hooks/useNMStateTranslation';
@@ -16,12 +21,13 @@ type PolicyInterfacesExpandableProps = {
   createForm?: boolean;
 };
 
-const PolicyInterfacesExpandable: React.FC<PolicyInterfacesExpandableProps> = ({
+const PolicyInterfacesExpandable: FC<PolicyInterfacesExpandableProps> = ({
   policy,
   setPolicy,
   createForm,
 }) => {
   const createdPolicy = useRef(createForm ? undefined : policy);
+
   const [interfaceToDelete, setInterfaceToDelete] = useState<NodeNetworkConfigurationInterface>();
   const { t } = useNMStateTranslation();
 
@@ -48,7 +54,7 @@ const PolicyInterfacesExpandable: React.FC<PolicyInterfacesExpandableProps> = ({
     <>
       {policy?.spec?.desiredState?.interfaces.map((policyInterface, index) => (
         <FormFieldGroupExpandable
-          key={`${policyInterface.type}-${index}`}
+          key={`${policyInterface.type}-${policyInterface?.name}`}
           className="policy-interface__expandable"
           toggleAriaLabel={t('Details')}
           isExpanded={true}
@@ -59,20 +65,26 @@ const PolicyInterfacesExpandable: React.FC<PolicyInterfacesExpandableProps> = ({
                 id: `nncp-interface-${index}`,
               }}
               actions={
-                <Button
-                  variant="plain"
-                  aria-label={t('Remove')}
-                  onClick={() => removeInterface(index)}
-                >
-                  <MinusCircleIcon />
-                </Button>
+                <Tooltip content={t('Remove interface')}>
+                  <Button
+                    variant="plain"
+                    aria-label={t('Remove')}
+                    onClick={() => removeInterface(index)}
+                  >
+                    <MinusCircleIcon />
+                  </Button>
+                </Tooltip>
               }
             />
           }
         >
           <PolicyInterface
             id={index}
-            editForm={!createForm}
+            createdInterface={
+              !!createdPolicy?.current?.spec?.desiredState?.interfaces?.find(
+                (iface) => iface.name === policyInterface.name,
+              )
+            }
             policyInterface={policyInterface}
             onInterfaceChange={(updateInterface: onInterfaceChangeType) =>
               setPolicy((draftPolicy) => {
